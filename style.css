@@ -1,0 +1,45 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.canvas-container {
+    display: inline-flex;
+}
+
+canvas { 
+    border: 1px solid grey
+}
+
+main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+button {
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 1.2rem;
+    letter-spacing: 0.05rem;
+    border: 0;
+    padding: 0.5rem 1rem 0.5rem 1rem;
+    box-shadow: 4px 4px 0px gray;
+    border-radius: 0;
+}
+
+button:hover {
+    background: lightgray;
+    cursor: pointer;
+}
+
+button:active {
+
+    box-shadow: none;
+    transform: translate(4px, 4px);
+}
+
+button:focus {
+    outline:0;
+}
