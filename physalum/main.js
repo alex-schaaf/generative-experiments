@@ -28,7 +28,7 @@ function setup() {
 
   grid = new Grid(nCells, nCells, cellSize)
   for (let i = 0; i < 10; i++) {
-    agents.push(new Agent(random(size), random(size)))
+    agents.push(new Agent(size / 2, size / 2))
   }
   noStroke()
   frameRate(60)
@@ -43,7 +43,7 @@ class Agent {
     this.y = y
     this.direction = random(360)
 
-    this.sensorAngle = 45
+    this.sensorAngle = 25
     this.sensorDistance = 9
     this.FL = 0
     this.F = 0
@@ -61,7 +61,7 @@ class Agent {
       this.x = x
       this.y = y
     } else {
-      this.perturb(180)
+      this.perturbRandomly(180)
       this.move()
     }
 
@@ -84,8 +84,31 @@ class Agent {
     return grid.getValue(x, y)
   }
 
-  perturb(rng) {
+  perturbRandomly(rng) {
     this.direction = (this.direction + random(-rng, rng)) % 360
+  }
+
+  perturb() {
+    if (this.F > this.FL && this.F > this.FR) {
+      return
+    } else if (this.F < this.FL && this.F < this.FR) {
+      if (random() < 0.5) {
+        // rotate left
+        this.direction = (this.direction - this.sensorAngle) % 360
+      } else {
+        // rotate right
+        this.direction = (this.direction + this.sensorAngle) % 360
+      }
+    } else if (this.FL < this.FR) {
+      // rotate right by sensor angle
+      this.direction = (this.direction + this.sensorAngle) % 360
+    } else if (this.FR < this.FL) {
+      // rotate left by sensor angle
+      this.direction = (this.direction - this.sensorAngle) % 360
+    } else {
+      // don't rotate
+      return
+    }
   }
 
   // Draw agent as a circle
@@ -147,10 +170,12 @@ function draw() {
   grid.draw()
   agents.forEach(agent => {
     agent.readSensors(grid)
-    agent.perturb(25)
+    agent.perturb()
     agent.move()
     deposit(agent, grid)
-    agent.draw()
+    blur(grid)
+    // decay(grid)
+    // agent.draw()
   })
 }
 
@@ -162,6 +187,19 @@ function deposit(agent, grid) {
   grid.grid[x][y] += 5
 }
 
-function decay(grid) {
+// Convolution of an average-blur kernel
+function blur(grid) {
 
 }
+
+
+function decay(grid) {
+  for (let r = 0; r < grid.rows; r++) {
+    for (let c = 0; c < grid.cols; c++) {
+      if (grid.grid[r, c] > 0) {
+        grid.grid[r][c] -= 5
+      }
+    }
+  }
+}
+
