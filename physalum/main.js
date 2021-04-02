@@ -29,7 +29,7 @@ function setup() {
     particles.push(new Particle(random(size), random(size)))
   }
   noStroke()
-  frameRate(24)
+  frameRate(60)
 }
 
 /**
@@ -90,22 +90,6 @@ class Particle {
   draw() {
     fill("red")
     circle(this.x, this.y, 5)
-    // fill("white")
-    // circle(
-    //   this.x + Math.cos(degToRad(this.direction)) * 9,
-    //   this.y + Math.sin(degToRad(this.direction)) * 9,
-    //   5, 5
-    // )
-    // circle(
-    //   this.x + Math.cos(degToRad(this.direction - 45)) * 9,
-    //   this.y + Math.sin(degToRad((this.direction - 45) % 360)) * 9,
-    //   5, 5
-    // )
-    // circle(
-    //   this.x + Math.cos(degToRad(this.direction + 45)) * 9,
-    //   this.y + Math.sin(degToRad((this.direction + 45) % 360)) * 9,
-    //   5, 5
-    // )
   }
 }
 
