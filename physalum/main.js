@@ -13,13 +13,13 @@ function move(x, y, angle, distance) {
 }
 
 function isOutOfBounds(x, y) {
-  return (x <= 0 || x >= width || y <= 0 || y >= height)
+  return (x <= 0 || x >= width - 1 || y <= 0 || y >= height - 1)
 }
 
 function setup() {
-  let nCells = 40
-  let size = min(800, 800)
-  size -= size % nCells
+  let nCells = 80
+  let size = 800
+  // size -= size % nCells
   let cellSize = size / nCells
   let canvas = createCanvas(size, size)
   canvas.parent("canvas-container")
@@ -40,6 +40,13 @@ class Particle {
     this.x = x
     this.y = y
     this.direction = random(360)
+
+    this.sensorAngle = 45
+    this.sensorDistance = 9
+    this.FL = 0
+    this.F = 0
+    this.FR = 0
+
     draw()
   }
 
@@ -60,6 +67,20 @@ class Particle {
       x: this.x + Math.cos(degToRad(degrees)) * step,
       y: this.y + Math.sin(degToRad(degrees)) * step
     }
+  }
+
+  readSensors(grid) {
+    this.FL = this.getSensorReading((this.direction - this.sensorAngle) % 360, grid)
+    this.F = this.getSensorReading(this.direction, grid)
+    this.FR = this.getSensorReading((this.direction + this.sensorAngle) % 360, grid)
+  }
+
+  getSensorReading(angle, grid) {
+    let { x, y } = move(this.x, this.y, angle, this.sensorDistance)
+    if (isOutOfBounds(x, y)) {
+      return 0
+    }
+    return grid.getValue(x, y)
   }
 
   perturb(rng) {
@@ -118,6 +139,21 @@ class Grid {
       }
     }
   }
+
+  xyToIdx(x, y) {
+    return { x: Math.floor(x / this.cellSize), y: Math.floor(y / this.cellSize) }
+  }
+
+  outOfBounds(x, y) {
+    let { gridX, gridY } = this.xyToIdx(x, y)
+    return (gridX < 0 || gridX >= this.cols || gridY < 0 || gridY >= this.rows)
+  }
+
+  getValue(xCoord, yCoord) {
+    let { x, y } = this.xyToIdx(xCoord, yCoord)
+    // console.log(`${xCoord} -> ${x}; ${yCoord} -> ${y}`)
+    return this.grid[x][y]
+  }
 }
 
 
@@ -125,6 +161,7 @@ function draw() {
   // background(255);
   grid.draw()
   particles.forEach(particle => {
+    particle.readSensors(grid)
     particle.perturb(25)
     particle.move()
     deposit(particle, grid)
@@ -133,11 +170,9 @@ function draw() {
 }
 
 function deposit(p, grid) {
-  let x = Math.floor(p.x / grid.cellSize)
-  let y = Math.floor(p.y / grid.cellSize)
-  console.log()
-  if (x < 0 || x >= grid.cols || y < 0 || y >= grid.rows) {
+  if (grid.outOfBounds(p.x, p.y)) {
     return
   }
-  grid.grid[x][y] += 5
+  let { x, y } = grid.xyToIdx(p.x, p.y)
+  grid.grid[x][y] += 15
 }
