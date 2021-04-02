@@ -1,5 +1,6 @@
-let particles = []
+let agents = []
 
+// Convert degree to radians
 function degToRad(deg) {
   return deg * (Math.PI / 180)
 }
@@ -12,6 +13,7 @@ function move(x, y, angle, distance) {
   }
 }
 
+// Check if given x,y coordinates are within canvas bounds
 function isOutOfBounds(x, y) {
   return (x <= 0 || x >= width - 1 || y <= 0 || y >= height - 1)
 }
@@ -25,17 +27,17 @@ function setup() {
   canvas.parent("canvas-container")
 
   grid = new Grid(nCells, nCells, cellSize)
-  for (let i = 0; i < 5; i++) {
-    particles.push(new Particle(random(size), random(size)))
+  for (let i = 0; i < 10; i++) {
+    agents.push(new Agent(random(size), random(size)))
   }
   noStroke()
   frameRate(60)
 }
 
 /**
- * Particle class
+ * Agent class
  */
-class Particle {
+class Agent {
   constructor(x, y) {
     this.x = x
     this.y = y
@@ -50,6 +52,9 @@ class Particle {
     draw()
   }
 
+
+  // Move agent. If movement step would be out of bounds the agent direction
+  // will be perturbed randomly and the function will be called recursively.
   move() {
     let { x, y } = move(this.x, this.y, this.direction, 5)
     if (!isOutOfBounds(x, y)) {
@@ -62,19 +67,15 @@ class Particle {
 
   }
 
-  getNextXY(degrees, step) {
-    return {
-      x: this.x + Math.cos(degToRad(degrees)) * step,
-      y: this.y + Math.sin(degToRad(degrees)) * step
-    }
-  }
-
+  // Read front left, front and front right sensors.
   readSensors(grid) {
     this.FL = this.getSensorReading((this.direction - this.sensorAngle) % 360, grid)
     this.F = this.getSensorReading(this.direction, grid)
     this.FR = this.getSensorReading((this.direction + this.sensorAngle) % 360, grid)
   }
 
+  // Get a reading from the grid at sensor distance from current agent position
+  // along given angle
   getSensorReading(angle, grid) {
     let { x, y } = move(this.x, this.y, angle, this.sensorDistance)
     if (isOutOfBounds(x, y)) {
@@ -87,6 +88,7 @@ class Particle {
     this.direction = (this.direction + random(-rng, rng)) % 360
   }
 
+  // Draw agent as a circle
   draw() {
     fill("red")
     circle(this.x, this.y, 5)
@@ -114,7 +116,6 @@ class Grid {
 
   draw() {
     fill("black")
-    // stroke(25, 25, 25, 255)
     for (let r = 0; r < this.rows; r++) {
       for (let c = 0; c < this.cols; c++) {
         let value = this.grid[r][c]
@@ -144,19 +145,23 @@ class Grid {
 function draw() {
   // background(255);
   grid.draw()
-  particles.forEach(particle => {
-    particle.readSensors(grid)
-    particle.perturb(25)
-    particle.move()
-    deposit(particle, grid)
-    particle.draw()
+  agents.forEach(agent => {
+    agent.readSensors(grid)
+    agent.perturb(25)
+    agent.move()
+    deposit(agent, grid)
+    agent.draw()
   })
 }
 
-function deposit(p, grid) {
-  if (grid.outOfBounds(p.x, p.y)) {
+function deposit(agent, grid) {
+  if (grid.outOfBounds(agent.x, agent.y)) {
     return
   }
-  let { x, y } = grid.xyToIdx(p.x, p.y)
-  grid.grid[x][y] += 15
+  let { x, y } = grid.xyToIdx(agent.x, agent.y)
+  grid.grid[x][y] += 5
+}
+
+function decay(grid) {
+
 }
