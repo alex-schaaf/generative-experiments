@@ -90,7 +90,10 @@ func main() {
 			y:              rand.Float64() * height,
 			direction:      rand.Float64() * 360,
 			sensorAngle:    sensorAngle,
-			sensorDistance: sensorDistance}
+			sensorDistance: sensorDistance,
+			fl:             0,
+			f:              0,
+			fr:             0}
 		agents = append(agents, agent)
 	}
 
