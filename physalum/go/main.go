@@ -13,11 +13,11 @@ import (
 )
 
 const width = 640
-const height = 480
-const sensorAngle = 25
+const height = 640
+const sensorAngle = 45
 const sensorDistance = 9
 
-var iter = 500
+var iter = 100
 
 type Agent struct {
 	x              float64
@@ -38,8 +38,8 @@ func (a *Agent) move() {
 		a.perturbRandomly(180)
 		a.move()
 	} else {
-		(*a).x = x
-		(*a).y = y
+		a.x = x
+		a.y = y
 	}
 }
 
@@ -100,7 +100,7 @@ func main() {
 	t0 := time.Now()
 
 	var agents []*Agent
-	for i := 0; i < width*height*0.15; i++ {
+	for i := 0; i < 100; i++ {
 		agent := &Agent{
 			x:              rand.Float64() * width,
 			y:              rand.Float64() * height,
@@ -200,13 +200,6 @@ func randSymmetricRange(boundary float64) float64 {
 func CreateImage(agents []*Agent, colorPalette []color.Color) *image.Paletted {
 	rect := image.Rect(0, 0, width, height)
 	img := image.NewPaletted(rect, colorPalette)
-
-	for y := 0; y < height; y++ {
-		for x := 0; x < width; x++ {
-			// c := 0
-			img.SetColorIndex(x, y, 0) // black canvas
-		}
-	}
 	for _, agent := range agents {
 		img.SetColorIndex(int(math.Floor(agent.y)), int(math.Floor(agent.x)), uint8(254))
 	}
