@@ -9,12 +9,15 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"time"
 )
 
-const width = 240
-const height = 240
+const width = 640
+const height = 480
 const sensorAngle = 25
 const sensorDistance = 9
+
+var iter = 500
 
 type Agent struct {
 	x              float64
@@ -28,13 +31,17 @@ type Agent struct {
 }
 
 func (a *Agent) move() {
+	// fmt.Println("move!")
 	x, y := move(a.x, a.y, a.direction, 1)
 	if isOutOfBounds(x, y, width, height) {
+		// fmt.Println("out of bounds!")
 		a.perturbRandomly(180)
 		a.move()
 	} else {
-		a.x = x
-		a.y = y
+		// fmt.Println("in bounds!")
+		// fmt.Printf("%f -> %f\n", a.x, x)
+		(*a).x = x
+		(*a).y = y
 	}
 }
 
@@ -83,9 +90,11 @@ func main() {
 	colorPalette := GetColorPalette(255)
 	images := []*image.Paletted{}
 
-	var agents = []Agent{}
-	for i := 0; i < 1; i++ {
-		agent := Agent{
+	t0 := time.Now()
+
+	var agents []*Agent
+	for i := 0; i < width*height*0.15; i++ {
+		agent := &Agent{
 			x:              rand.Float64() * width,
 			y:              rand.Float64() * height,
 			direction:      rand.Float64() * 360,
@@ -98,11 +107,9 @@ func main() {
 	}
 
 	// run simulation
-	var iter = 100
 	delays := []int{}
 	for iter > 0 {
 		for _, agent := range agents {
-			fmt.Println(agent)
 			agent.readSensors(grid)
 			agent.perturb()
 			agent.move()
@@ -115,7 +122,7 @@ func main() {
 		images = append(images, img)
 
 		iter--
-		delays = append(delays, 0)
+		delays = append(delays, 8)
 	}
 
 	anim := gif.GIF{Delay: delays, Image: images}
@@ -130,6 +137,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	t1 := time.Now()
+
+	td := t1.Second() - t0.Second()
+	fmt.Printf("This took %d Seconds.", td)
 }
 
 func degToRad(deg float64) float64 {
@@ -172,7 +184,7 @@ func randSymmetricRange(boundary float64) float64 {
 	return (rand.Float64() - 0.5) * 2 * boundary
 }
 
-func CreateImage(agents []Agent, colorPalette []color.Color) *image.Paletted {
+func CreateImage(agents []*Agent, colorPalette []color.Color) *image.Paletted {
 	rect := image.Rect(0, 0, width, height)
 	img := image.NewPaletted(rect, colorPalette)
 
