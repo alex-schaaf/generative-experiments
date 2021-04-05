@@ -1,4 +1,5 @@
 *.gif
+physalum/go/.idea/*
 
 # Created by https://www.toptal.com/developers/gitignore/api/macos,python,jupyternotebooks,go,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,python,jupyternotebooks,go,visualstudiocode
