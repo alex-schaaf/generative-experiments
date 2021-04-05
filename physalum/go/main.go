@@ -30,25 +30,27 @@ type Agent struct {
 	fr             float64
 }
 
+// move the agent by 1 (if step would be within bounds)
+// else perturb direction randomly and try to move again
 func (a *Agent) move() {
-	// fmt.Println("move!")
 	x, y := move(a.x, a.y, a.direction, 1)
 	if isOutOfBounds(x, y, width, height) {
-		// fmt.Println("out of bounds!")
 		a.perturbRandomly(180)
 		a.move()
 	} else {
-		// fmt.Println("in bounds!")
-		// fmt.Printf("%f -> %f\n", a.x, x)
 		(*a).x = x
 		(*a).y = y
 	}
 }
 
+// perturbRandomly shuffles the direction of an agent by adding a
+// random number between [-angle, angle]
 func (a *Agent) perturbRandomly(angle float64) {
 	a.direction = float64(int(a.direction+randSymmetricRange(angle)) % 360)
 }
 
+// perturb takes care of modifying the direction of the agent in line
+// with Jones (2010) paper to follow pheromone trails on the underlying grid
 func (a *Agent) perturb() {
 	if a.f > a.fl && a.f > a.fr {
 		return
@@ -67,12 +69,16 @@ func (a *Agent) perturb() {
 	}
 }
 
+// readSensors reads out the front left (FL), front (F) and front right (FR)
+// sensors of an agent, will read 0 if sensor position is out of bounds
 func (a *Agent) readSensors(grid [width * height]float64) {
 	a.fl = a.getSensorReading(float64(int(a.direction-a.sensorAngle)%360), grid)
 	a.f = a.getSensorReading(a.direction, grid)
 	a.fr = a.getSensorReading(float64(int(a.direction+a.sensorAngle)%360), grid)
 }
 
+// getSensorReading at given angle in agent.sensorDistance from the grid
+// return 0 if sensor position would be out of bounds
 func (a *Agent) getSensorReading(angle float64, grid [width * height]float64) float64 {
 	x, y := move(a.x, a.y, angle, a.sensorDistance)
 	if isOutOfBounds(x, y, width, height) {
@@ -81,6 +87,7 @@ func (a *Agent) getSensorReading(angle float64, grid [width * height]float64) fl
 	return grid[int(math.Floor(y))*width+int(math.Floor(x))]
 }
 
+// deposit a given amount of pheromone trail onto the grid at the agent's position
 func (a *Agent) deposit(grid *[width * height]float64, amount float64) {
 	grid[int(math.Floor(a.y))*width+int(math.Floor(a.x))] += amount
 }
@@ -144,6 +151,7 @@ func main() {
 	fmt.Printf("This took %d Seconds.", td)
 }
 
+// degToRad converts degrees to radians
 func degToRad(deg float64) float64 {
 	return deg * (math.Pi / 180)
 }
@@ -158,6 +166,7 @@ func isOutOfBounds(x float64, y float64, width float64, height float64) bool {
 	return (x <= 0 || x >= width-1 || y <= 0 || y >= height-1)
 }
 
+// blur every pixel of the grid with an average of all 8 neighbors and itself
 func blur(grid *[width * height]float64) [width * height]float64 {
 	var newGrid [width * height]float64
 	for x := 1; x < width-1; x++ {
@@ -168,6 +177,7 @@ func blur(grid *[width * height]float64) [width * height]float64 {
 	return newGrid
 }
 
+// decay the grid pheromone values by a factor of 0.9
 func decay(grid *[width * height]float64) {
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
@@ -176,14 +186,17 @@ func decay(grid *[width * height]float64) {
 	}
 }
 
+// idx converts x,y coordinates into the corresponding flattened array index
 func idx(x int, y int) int {
 	return y*width + x
 }
 
+// randSymmetricRange returns a random float in [-boundary, boundary]
 func randSymmetricRange(boundary float64) float64 {
 	return (rand.Float64() - 0.5) * 2 * boundary
 }
 
+// CreateImage creates a new image with a black background and white dots for each agent
 func CreateImage(agents []*Agent, colorPalette []color.Color) *image.Paletted {
 	rect := image.Rect(0, 0, width, height)
 	img := image.NewPaletted(rect, colorPalette)
@@ -200,10 +213,11 @@ func CreateImage(agents []*Agent, colorPalette []color.Color) *image.Paletted {
 	return img
 }
 
-func GetColorPalette(colors int) []color.Color {
+// GetColorPalette creates a grayscale color palette with nColors steps
+func GetColorPalette(nColos int) []color.Color {
 	palette := []color.Color{color.Gray{0}}
-	colors--
-	for i, delta := 1, 255/colors; i < colors; i++ {
+	nColos--
+	for i, delta := 1, 255/nColos; i < nColos; i++ {
 		palette = append(palette, color.Gray{uint8(delta * i)})
 	}
 	palette = append(palette, color.Gray{255})
