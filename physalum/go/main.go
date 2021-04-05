@@ -95,7 +95,7 @@ func (a *Agent) deposit(grid *[width * height]float64, amount float64) {
 func main() {
 	var grid [width * height]float64
 	colorPalette := GetColorPalette(255)
-	images := []*image.Paletted{}
+	var images []*image.Paletted
 
 	t0 := time.Now()
 
@@ -114,7 +114,7 @@ func main() {
 	}
 
 	// run simulation
-	delays := []int{}
+	var delays []int
 	for iter > 0 {
 		for _, agent := range agents {
 			agent.readSensors(grid)
@@ -158,12 +158,12 @@ func degToRad(deg float64) float64 {
 
 // Move x,y along given angle with given distance.
 func move(x float64, y float64, angle float64, distance float64) (float64, float64) {
-	return x + math.Cos(degToRad(angle))*distance, y + math.Sin(degToRad((angle)))*distance
+	return x + math.Cos(degToRad(angle))*distance, y + math.Sin(degToRad(angle))*distance
 }
 
 // Check if given x,y coordinates are within canvas bounds
 func isOutOfBounds(x float64, y float64, width float64, height float64) bool {
-	return (x <= 0 || x >= width-1 || y <= 0 || y >= height-1)
+	return x <= 0 || x >= width-1 || y <= 0 || y >= height-1
 }
 
 // blur every pixel of the grid with an average of all 8 neighbors and itself
@@ -208,11 +208,11 @@ func CreateImage(agents []*Agent, colorPalette []color.Color) *image.Paletted {
 
 // GetColorPalette creates a grayscale color palette with nColors steps
 func GetColorPalette(nColos int) []color.Color {
-	palette := []color.Color{color.Gray{0}}
+	palette := []color.Color{color.Gray{}}
 	nColos--
 	for i, delta := 1, 255/nColos; i < nColos; i++ {
-		palette = append(palette, color.Gray{uint8(delta * i)})
+		palette = append(palette, color.Gray{Y: uint8(delta * i)})
 	}
-	palette = append(palette, color.Gray{255})
+	palette = append(palette, color.Gray{Y: 255})
 	return palette
 }
