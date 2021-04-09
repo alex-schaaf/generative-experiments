@@ -12,12 +12,12 @@ import (
 	"time"
 )
 
-const width = 640
-const height = 640
-const sensorAngle = 45
+const width = 240
+const height = 240
+const sensorAngle = 25
 const sensorDistance = 9
 
-var iter = 100
+var iter = 240
 
 type Agent struct {
 	x              float64
@@ -93,6 +93,8 @@ func (a *Agent) deposit(grid *[width * height]float64, amount float64) {
 }
 
 func main() {
+	seed := time.Now().UTC().Unix()
+	rand.Seed(seed)
 	var grid [width * height]float64
 	colorPalette := GetColorPalette(255)
 	var images []*image.Paletted
@@ -100,7 +102,7 @@ func main() {
 	t0 := time.Now()
 
 	var agents []*Agent
-	for i := 0; i < 100; i++ {
+	for i := 0; i < width*height*0.15; i++ {
 		agent := &Agent{
 			x:              rand.Float64() * width,
 			y:              rand.Float64() * height,
@@ -134,7 +136,7 @@ func main() {
 
 	anim := gif.GIF{Delay: delays, Image: images}
 
-	file, err := os.OpenFile("go.gif", os.O_WRONLY|os.O_CREATE, 0600)
+	file, err := os.OpenFile(fmt.Sprint(seed)+".gif", os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		log.Fatal(err)
 	}
