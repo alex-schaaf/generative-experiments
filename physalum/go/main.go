@@ -1,4 +1,4 @@
-package main
+package physalum
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ import (
 
 const width = 240
 const height = 240
-const sensorAngle = 25
+const sensorAngle = 14
 const sensorDistance = 9
 
 var iter = 240
@@ -94,15 +94,17 @@ func (a *Agent) deposit(grid *[width * height]float64, amount float64) {
 
 func main() {
 	seed := time.Now().UTC().Unix()
-	rand.Seed(seed)
+	rand.Seed(seed) // set random seed to currennt unix timestamp
+
 	var grid [width * height]float64
+
 	colorPalette := GetColorPalette(255)
 	var images []*image.Paletted
 
 	t0 := time.Now()
 
 	var agents []*Agent
-	for i := 0; i < width*height*0.15; i++ {
+	for i := 0; i < 100; i++ {
 		agent := &Agent{
 			x:              rand.Float64() * width,
 			y:              rand.Float64() * height,
@@ -149,7 +151,7 @@ func main() {
 
 	t1 := time.Now()
 
-	td := t1.Second() - t0.Second()
+	td := t1.Unix() - t0.Unix()
 	fmt.Printf("This took %d Seconds.", td)
 }
 
